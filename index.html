@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Language Flashcards</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <link rel="manifest" href="manifest.json">
+    
+    <meta name="theme-color" content="#121212">
+    
+    <link rel="apple-touch-icon" href="icon-192x192.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+
+    <div id="landing-page" class="screen active">
+        <header>
+            <img src="logo.png" alt="Company Logo" id="logo" style="max-width: 150px;">
+            <h2>Select a Lesson</h2>
+        </header>
+        <div id="lesson-grid" class="grid-container">
+            </div>
+    </div>
+
+    <div id="flashcard-page" class="screen">
+        <header class="top-bar">
+            <button id="btn-back" onclick="returnToMenu()">← Back</button>
+            <div id="scoreboard">Score: <span id="score-count">0</span> / 50</div>
+        </header>
+
+        <div class="card-container" id="flashcard-container" onclick="flipCard()">
+            <div class="flashcard" id="flashcard">
+                <div class="card-face card-front">
+                    <p id="turkish-text">Turkish Sentence Here</p>
+                    <p class="tap-hint">Tap to reveal English</p>
+                </div>
+                <div class="card-face card-back">
+                    <p id="turkish-text-back" class="small-text">Turkish Sentence Here</p>
+                    <p id="english-text">English Sentence Here</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons" id="action-buttons">
+            <button class="btn-incorrect" onclick="markAnswer(false)">✖ Incorrect</button>
+            <button class="btn-correct" onclick="markAnswer(true)">✔ Correct</button>
+        </div>
+    </div>
+
+    <div id="unlock-banner" class="overlay hidden">
+        <div class="banner-content">
+            <h2>🎉 Congratulations! 🎉</h2>
+            <p>You reached 40 correct answers. The next lesson is unlocked!</p>
+            <div class="banner-buttons">
+                <button class="btn-primary" onclick="goToNextLesson()">Go to Next Lesson</button>
+                <button class="btn-secondary" onclick="continuePracticing()">Continue Practice</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker registered successfully with scope:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
