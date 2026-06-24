@@ -9,6 +9,14 @@ let currentCardIndex = 0;
 let correctCount = 0;
 let unlockTriggered = false;
 
+// 19 distinct vibrant colors for the lesson grid
+const lessonColors = [
+    "#EF5350", "#EC407A", "#AB47BC", "#7E57C2", "#5C6BC0", 
+    "#42A5F5", "#29B6F6", "#26C6DA", "#26A69A", "#66BB6A", 
+    "#9CCC65", "#D4E157", "#FFEE58", "#FFCA28", "#FFA726", 
+    "#FF7043", "#8D6E63", "#78909C", "#D32F2F"
+];
+
 // Initialize App
 document.addEventListener("DOMContentLoaded", () => {
     buildLessonGrid();
@@ -24,11 +32,13 @@ function buildLessonGrid() {
         
         if (i <= unlockedLevel) {
             btn.classList.add("unlocked");
-            btn.innerText = "Lesson " + i;
+            btn.innerText = i; // Just the huge number
+            btn.style.backgroundColor = lessonColors[i - 1]; // Apply unique color
             btn.onclick = () => startLesson(i);
         } else {
             btn.classList.add("locked");
             btn.innerText = "🔒 " + i;
+            // Locked buttons default to grey via CSS
         }
         grid.appendChild(btn);
     }
@@ -41,36 +51,34 @@ async function startLesson(lessonNum) {
     currentCardIndex = 0;
     unlockTriggered = false;
     
-    // Switch screens
+    // Switch screens & scroll to top smoothly
     document.getElementById("landing-page").classList.remove("active");
     document.getElementById("flashcard-page").classList.add("active");
+    window.scrollTo(0, 0);
+    
     updateScoreboard();
 
-    // Fetch data from Google Sheets (Replace sheet ID if needed)
+    // Fetch data from Google Sheets
     const sheetId = '1JdZDvuKpeUIo_Ut731aDVL4dMhNDQt-YsXplmEfYJXA';
-    const sheetName = `Lesson${lessonNum}`; 
+    const sheetName = `Sayfa${lessonNum}`; // Defaulting to "Sayfa" based on typical Turkish sheet naming, adjust if your tabs are strictly "Lesson1"
     const queryUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
 
     try {
         const response = await fetch(queryUrl);
         const text = await response.text();
-        // Google viz returns a script wrapper, we must parse the JSON inside it
         const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
         const data = JSON.parse(jsonString);
         
-        // Map Google Sheet rows to our card format
-        // Assuming Column A is Turkish, Column B is English with HTML <span> highlights
         currentDeck = data.table.rows.map(row => ({
             turkish: row.c[0] ? row.c[0].v : "",
             english: row.c[1] ? row.c[1].v : ""
-        })).filter(card => card.turkish !== ""); // Remove empty rows
+        })).filter(card => card.turkish !== "");
 
     } catch (error) {
         console.error("Error fetching sheet, loading fallback data", error);
-        // Fallback testing data if sheet fails to load
         currentDeck = Array.from({length: 50}, (_, i) => ({
             turkish: `Örnek Cümle ${i + 1}`,
-            english: `Example Sentence <span style="color: #ff9800;">${i + 1}</span>`
+            english: `Example Sentence <span style="color: #4caf50;">${i + 1}</span>`
         }));
     }
 
@@ -78,7 +86,6 @@ async function startLesson(lessonNum) {
 }
 
 function loadCard() {
-    // If the main deck is empty, check if we need to review incorrect cards
     if (currentCardIndex >= currentDeck.length) {
         if (incorrectPile.length > 0) {
             currentDeck = [...incorrectPile];
@@ -94,7 +101,6 @@ function loadCard() {
     const card = currentDeck[currentCardIndex];
     document.getElementById("turkish-text").innerText = card.turkish;
     document.getElementById("turkish-text-back").innerText = card.turkish;
-    // use innerHTML here to allow your highlighted <span> tags from the sheet to render
     document.getElementById("english-text").innerHTML = card.english; 
 
     resetCardUI();
@@ -123,11 +129,10 @@ function markAnswer(isCorrect) {
 
     currentCardIndex++;
     
-    // Check for threshold unlock immediately
     if (correctCount === passThreshold && !unlockTriggered && currentLesson === unlockedLevel) {
         triggerUnlock();
     } else {
-        setTimeout(loadCard, 200); // Small delay to let flip animation reset smoothly
+        setTimeout(loadCard, 200); 
     }
 }
 
@@ -156,5 +161,6 @@ function continuePracticing() {
 function returnToMenu() {
     document.getElementById("flashcard-page").classList.remove("active");
     document.getElementById("landing-page").classList.add("active");
-    buildLessonGrid(); // Rebuild grid to show newly unlocked lessons
+    window.scrollTo(0, 0);
+    buildLessonGrid();
 }
