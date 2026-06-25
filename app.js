@@ -6,14 +6,17 @@ let unlockedLevel = parseInt(localStorage.getItem('unlockedLevel')) || 1;
 let currentDeck = [];
 let incorrectPile = [];
 let currentCardIndex = 0;
+
+// Scoreboard Trackers
 let correctCount = 0;
+let totalMistakes = 0;
 let unlockTriggered = false;
 
 // Admin Override Variables
 let logoTaps = 0;
 let lastTapTime = 0;
 let isAdminMode = false;
-let realSavedLevel = unlockedLevel; // Remembers your actual progress
+let realSavedLevel = unlockedLevel; 
 
 const lessonColors = [
     "#EF5350", "#EC407A", "#AB47BC", "#7E57C2", "#5C6BC0", 
@@ -52,6 +55,7 @@ function buildLessonGrid() {
 async function startLesson(lessonNum) {
     currentLesson = lessonNum;
     correctCount = 0;
+    totalMistakes = 0;
     incorrectPile = [];
     currentCardIndex = 0;
     unlockTriggered = false;
@@ -125,14 +129,14 @@ function resetCardUI() {
 function markAnswer(isCorrect) {
     if (isCorrect) {
         correctCount++;
-        updateScoreboard();
     } else {
         incorrectPile.push(currentDeck[currentCardIndex]);
+        totalMistakes++;
     }
-
+    
+    updateScoreboard();
     currentCardIndex++;
     
-    // Only trigger real unlocks if Admin Mode is OFF
     if (correctCount === passThreshold && !unlockTriggered && currentLesson === unlockedLevel && !isAdminMode) {
         triggerUnlock();
     } else {
@@ -141,13 +145,16 @@ function markAnswer(isCorrect) {
 }
 
 function updateScoreboard() {
-    document.getElementById("score-count").innerText = correctCount;
+    // Correct total, mistakes total, and remaining out of the 50 deck
+    document.getElementById("score-correct").innerText = "✔ " + correctCount;
+    document.getElementById("score-wrong").innerText = "✖ " + totalMistakes;
+    document.getElementById("score-remain").innerText = "📦 " + (50 - correctCount);
 }
 
 function triggerUnlock() {
     unlockTriggered = true;
     unlockedLevel++;
-    realSavedLevel = unlockedLevel; // Update real save
+    realSavedLevel = unlockedLevel; 
     localStorage.setItem('unlockedLevel', unlockedLevel);
     document.getElementById("unlock-banner").classList.remove("hidden");
 }
@@ -174,12 +181,12 @@ function returnToMenu() {
 function toggleAdminMode() {
     if (isAdminMode) {
         isAdminMode = false;
-        unlockedLevel = realSavedLevel; // Restore actual progress
+        unlockedLevel = realSavedLevel; 
         alert("Admin Mode: OFF. Returning to normal progression.");
     } else {
         isAdminMode = true;
-        realSavedLevel = unlockedLevel; // Save where they currently are
-        unlockedLevel = totalLessons; // Temporarily unlock all
+        realSavedLevel = unlockedLevel; 
+        unlockedLevel = totalLessons; 
         alert("Admin Mode: ON. All lessons temporarily unlocked.");
     }
     buildLessonGrid();
@@ -208,7 +215,6 @@ function setupAdminOverrides() {
 function setupKeyboardShortcuts() {
     document.addEventListener("keydown", (event) => {
         
-        // ADMIN CHEAT CODE: Shift + U
         if (event.shiftKey && (event.key === 'U' || event.key === 'u')) {
             toggleAdminMode();
             return; 
