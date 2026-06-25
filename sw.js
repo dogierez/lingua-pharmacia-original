@@ -1,5 +1,5 @@
-// CHANGE THIS NUMBER EVERY TIME YOU UPDATE CSS OR JS
-const CACHE_NAME = 'flashcard-app-v2'; 
+// CACHE BUSTED TO v3 to force new styles to load
+const CACHE_NAME = 'flashcard-app-v3'; 
 
 const ASSETS_TO_CACHE = [
     './',
