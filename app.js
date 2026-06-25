@@ -25,7 +25,7 @@ const lessonColors = [
 document.addEventListener("DOMContentLoaded", () => {
     buildLessonGrid();
     setupKeyboardShortcuts(); 
-    setupAdminOverrides(); // Enable Admin Backdoors
+    setupAdminOverrides(); 
 });
 
 function buildLessonGrid() {
@@ -38,12 +38,14 @@ function buildLessonGrid() {
         
         if (i <= unlockedLevel) {
             btn.classList.add("unlocked");
-            btn.innerText = i; 
+            // Added "Lesson" text back onto the button
+            btn.innerText = "Lesson " + i; 
             btn.style.backgroundColor = lessonColors[i - 1]; 
             btn.onclick = () => startLesson(i);
         } else {
             btn.classList.add("locked");
-            btn.innerText = "🔒 " + i;
+            // Added "Lesson" text back onto the locked buttons
+            btn.innerText = "🔒 Lesson " + i;
         }
         grid.appendChild(btn);
     }
@@ -176,7 +178,6 @@ function setupAdminOverrides() {
             const currentTime = new Date().getTime();
             const tapGap = currentTime - lastTapTime;
             
-            // Require taps to be within 500ms of each other
             if (tapGap < 500) { 
                 logoTaps++;
             } else {
@@ -197,7 +198,6 @@ function triggerAdminUnlockAll() {
     unlockedLevel = totalLessons;
     localStorage.setItem('unlockedLevel', unlockedLevel);
     buildLessonGrid();
-    // A subtle alert just so you know it worked
     alert("Admin Access: All lessons unlocked."); 
 }
 
@@ -208,7 +208,7 @@ function setupKeyboardShortcuts() {
         // ADMIN CHEAT CODE: Shift + U
         if (event.shiftKey && (event.key === 'U' || event.key === 'u')) {
             triggerAdminUnlockAll();
-            return; // Exit early so it doesn't trigger flashcard logic
+            return; 
         }
 
         const flashcardPage = document.getElementById("flashcard-page");
