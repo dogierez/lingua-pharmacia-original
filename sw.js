@@ -1,5 +1,5 @@
-// CACHE BUSTED TO v3 to force new styles to load
-const CACHE_NAME = 'flashcard-app-v3'; 
+// CACHE BUSTED TO v4
+const CACHE_NAME = 'flashcard-app-v4'; 
 
 const ASSETS_TO_CACHE = [
     './',
