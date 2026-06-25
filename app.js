@@ -12,8 +12,9 @@ let unlockTriggered = false;
 // Admin Override Variables
 let logoTaps = 0;
 let lastTapTime = 0;
+let isAdminMode = false;
+let realSavedLevel = unlockedLevel; // Remembers your actual progress
 
-// 19 distinct vibrant colors for the lesson grid
 const lessonColors = [
     "#EF5350", "#EC407A", "#AB47BC", "#7E57C2", "#5C6BC0", 
     "#42A5F5", "#29B6F6", "#26C6DA", "#26A69A", "#66BB6A", 
@@ -21,7 +22,6 @@ const lessonColors = [
     "#FF7043", "#8D6E63", "#78909C", "#D32F2F"
 ];
 
-// Initialize App
 document.addEventListener("DOMContentLoaded", () => {
     buildLessonGrid();
     setupKeyboardShortcuts(); 
@@ -38,13 +38,11 @@ function buildLessonGrid() {
         
         if (i <= unlockedLevel) {
             btn.classList.add("unlocked");
-            // Added "Lesson" text back onto the button
             btn.innerText = "Lesson " + i; 
             btn.style.backgroundColor = lessonColors[i - 1]; 
             btn.onclick = () => startLesson(i);
         } else {
             btn.classList.add("locked");
-            // Added "Lesson" text back onto the locked buttons
             btn.innerText = "🔒 Lesson " + i;
         }
         grid.appendChild(btn);
@@ -80,10 +78,10 @@ async function startLesson(lessonNum) {
         })).filter(card => card.turkish !== "");
 
     } catch (error) {
-        console.error("Error fetching sheet, loading fallback data", error);
+        console.error("Error fetching sheet", error);
         currentDeck = Array.from({length: 50}, (_, i) => ({
             turkish: `Örnek Cümle ${i + 1}`,
-            english: `Example Sentence <span style="color: #4caf50;">${i + 1}</span>`
+            english: `Example <span style="color: #4caf50;">${i + 1}</span>`
         }));
     }
 
@@ -134,7 +132,8 @@ function markAnswer(isCorrect) {
 
     currentCardIndex++;
     
-    if (correctCount === passThreshold && !unlockTriggered && currentLesson === unlockedLevel) {
+    // Only trigger real unlocks if Admin Mode is OFF
+    if (correctCount === passThreshold && !unlockTriggered && currentLesson === unlockedLevel && !isAdminMode) {
         triggerUnlock();
     } else {
         setTimeout(loadCard, 200); 
@@ -148,6 +147,7 @@ function updateScoreboard() {
 function triggerUnlock() {
     unlockTriggered = true;
     unlockedLevel++;
+    realSavedLevel = unlockedLevel; // Update real save
     localStorage.setItem('unlockedLevel', unlockedLevel);
     document.getElementById("unlock-banner").classList.remove("hidden");
 }
@@ -170,44 +170,47 @@ function returnToMenu() {
     buildLessonGrid();
 }
 
-// --- ADMIN OVERRIDES ---
+// --- ADMIN TOGGLE LOGIC ---
+function toggleAdminMode() {
+    if (isAdminMode) {
+        isAdminMode = false;
+        unlockedLevel = realSavedLevel; // Restore actual progress
+        alert("Admin Mode: OFF. Returning to normal progression.");
+    } else {
+        isAdminMode = true;
+        realSavedLevel = unlockedLevel; // Save where they currently are
+        unlockedLevel = totalLessons; // Temporarily unlock all
+        alert("Admin Mode: ON. All lessons temporarily unlocked.");
+    }
+    buildLessonGrid();
+}
+
 function setupAdminOverrides() {
     const logo = document.getElementById("logo");
     if (logo) {
         logo.addEventListener("click", () => {
             const currentTime = new Date().getTime();
-            const tapGap = currentTime - lastTapTime;
-            
-            if (tapGap < 500) { 
+            if (currentTime - lastTapTime < 500) { 
                 logoTaps++;
             } else {
                 logoTaps = 1; 
             }
-            
             lastTapTime = currentTime;
 
             if (logoTaps >= 5) {
-                triggerAdminUnlockAll();
+                toggleAdminMode();
                 logoTaps = 0; 
             }
         });
     }
 }
 
-function triggerAdminUnlockAll() {
-    unlockedLevel = totalLessons;
-    localStorage.setItem('unlockedLevel', unlockedLevel);
-    buildLessonGrid();
-    alert("Admin Access: All lessons unlocked."); 
-}
-
-// --- KEYBOARD SHORTCUTS ---
 function setupKeyboardShortcuts() {
     document.addEventListener("keydown", (event) => {
         
         // ADMIN CHEAT CODE: Shift + U
         if (event.shiftKey && (event.key === 'U' || event.key === 'u')) {
-            triggerAdminUnlockAll();
+            toggleAdminMode();
             return; 
         }
 
