@@ -21,7 +21,7 @@ body {
     min-height: 100vh;
     width: 100%;
     padding: 20px;
-    position: relative; /* Needed for absolute positioning of scoreboard */
+    position: relative; 
 }
 
 .screen.active {
@@ -45,20 +45,27 @@ header {
     grid-template-columns: repeat(4, 1fr);
     gap: 12px;
     padding-bottom: 40px; 
+    /* THIS SHRINKS THE BUTTONS HORIZONTALLY */
+    max-width: 500px; 
+    margin: 0 auto; /* Centers the smaller grid on the screen */
 }
 
 .lesson-btn {
     border: none;
     border-radius: 12px;
-    padding: 15px 5px;
-    font-size: 24px;
+    padding: 10px 5px;
+    /* Font size reduced to fit the word "Lesson" */
+    font-size: 16px; 
     font-weight: bold;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
-    height: 70px;
+    /* Forces the buttons into nice, compact squares */
+    aspect-ratio: 1 / 1; 
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    text-align: center;
     color: #ffffff;
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
@@ -71,7 +78,7 @@ header {
     background-color: #2a2a2a !important;
     color: #555555;
     box-shadow: none;
-    font-size: 18px;
+    font-size: 14px;
     cursor: not-allowed;
 }
 
@@ -102,12 +109,12 @@ header {
     right: 20px;
     font-size: 26px;
     font-weight: bold;
-    color: #FFEB3B; /* Neon Yellow Text */
-    background-color: rgba(255, 235, 59, 0.1); /* Slight yellow tint background */
+    color: #FFEB3B; 
+    background-color: rgba(255, 235, 59, 0.1); 
     padding: 10px 20px;
     border: 2px solid #FFEB3B;
     border-radius: 12px;
-    box-shadow: 0 0 15px rgba(255, 235, 59, 0.4), inset 0 0 10px rgba(255, 235, 59, 0.2); /* Outer and inner glow */
+    box-shadow: 0 0 15px rgba(255, 235, 59, 0.4), inset 0 0 10px rgba(255, 235, 59, 0.2); 
     text-shadow: 0 0 8px rgba(255, 235, 59, 0.6);
     z-index: 10;
 }
@@ -119,7 +126,7 @@ header {
     justify-content: center;
     align-items: center;
     min-height: 400px; 
-    margin-top: 40px; /* Gives space so the huge scoreboard doesn't overlap */
+    margin-top: 40px; 
 }
 
 .flashcard {
