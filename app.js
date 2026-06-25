@@ -9,6 +9,10 @@ let currentCardIndex = 0;
 let correctCount = 0;
 let unlockTriggered = false;
 
+// Admin Override Variables
+let logoTaps = 0;
+let lastTapTime = 0;
+
 // 19 distinct vibrant colors for the lesson grid
 const lessonColors = [
     "#EF5350", "#EC407A", "#AB47BC", "#7E57C2", "#5C6BC0", 
@@ -20,7 +24,8 @@ const lessonColors = [
 // Initialize App
 document.addEventListener("DOMContentLoaded", () => {
     buildLessonGrid();
-    setupKeyboardShortcuts(); // Enable Arrow Keys
+    setupKeyboardShortcuts(); 
+    setupAdminOverrides(); // Enable Admin Backdoors
 });
 
 function buildLessonGrid() {
@@ -163,32 +168,67 @@ function returnToMenu() {
     buildLessonGrid();
 }
 
-// KEYBOARD SHORTCUTS LOGIC
+// --- ADMIN OVERRIDES ---
+function setupAdminOverrides() {
+    const logo = document.getElementById("logo");
+    if (logo) {
+        logo.addEventListener("click", () => {
+            const currentTime = new Date().getTime();
+            const tapGap = currentTime - lastTapTime;
+            
+            // Require taps to be within 500ms of each other
+            if (tapGap < 500) { 
+                logoTaps++;
+            } else {
+                logoTaps = 1; 
+            }
+            
+            lastTapTime = currentTime;
+
+            if (logoTaps >= 5) {
+                triggerAdminUnlockAll();
+                logoTaps = 0; 
+            }
+        });
+    }
+}
+
+function triggerAdminUnlockAll() {
+    unlockedLevel = totalLessons;
+    localStorage.setItem('unlockedLevel', unlockedLevel);
+    buildLessonGrid();
+    // A subtle alert just so you know it worked
+    alert("Admin Access: All lessons unlocked."); 
+}
+
+// --- KEYBOARD SHORTCUTS ---
 function setupKeyboardShortcuts() {
     document.addEventListener("keydown", (event) => {
+        
+        // ADMIN CHEAT CODE: Shift + U
+        if (event.shiftKey && (event.key === 'U' || event.key === 'u')) {
+            triggerAdminUnlockAll();
+            return; // Exit early so it doesn't trigger flashcard logic
+        }
+
         const flashcardPage = document.getElementById("flashcard-page");
         const unlockBanner = document.getElementById("unlock-banner");
         
-        // Only allow keyboard controls if the flashcard page is active and the popup banner is hidden
         if (flashcardPage.classList.contains("active") && unlockBanner.classList.contains("hidden")) {
             const flashcard = document.getElementById("flashcard");
             const isFlipped = flashcard.classList.contains("flipped");
 
             switch(event.key) {
                 case "ArrowUp":
-                    // Up Arrow: Reveal
                     if (!isFlipped) flipCard();
                     break;
                 case "ArrowDown":
-                    // Down Arrow: Hide (Handle)
                     if (isFlipped) resetCardUI();
                     break;
                 case "ArrowLeft":
-                    // Left Arrow: Wrong (only works if card is already flipped)
                     if (isFlipped) markAnswer(false);
                     break;
                 case "ArrowRight":
-                    // Right Arrow: Correct (only works if card is already flipped)
                     if (isFlipped) markAnswer(true);
                     break;
             }
