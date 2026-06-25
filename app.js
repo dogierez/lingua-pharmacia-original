@@ -20,6 +20,7 @@ const lessonColors = [
 // Initialize App
 document.addEventListener("DOMContentLoaded", () => {
     buildLessonGrid();
+    setupKeyboardShortcuts(); // Enable Arrow Keys
 });
 
 function buildLessonGrid() {
@@ -32,13 +33,12 @@ function buildLessonGrid() {
         
         if (i <= unlockedLevel) {
             btn.classList.add("unlocked");
-            btn.innerText = i; // Just the huge number
-            btn.style.backgroundColor = lessonColors[i - 1]; // Apply unique color
+            btn.innerText = i; 
+            btn.style.backgroundColor = lessonColors[i - 1]; 
             btn.onclick = () => startLesson(i);
         } else {
             btn.classList.add("locked");
             btn.innerText = "🔒 " + i;
-            // Locked buttons default to grey via CSS
         }
         grid.appendChild(btn);
     }
@@ -51,16 +51,14 @@ async function startLesson(lessonNum) {
     currentCardIndex = 0;
     unlockTriggered = false;
     
-    // Switch screens & scroll to top smoothly
     document.getElementById("landing-page").classList.remove("active");
     document.getElementById("flashcard-page").classList.add("active");
     window.scrollTo(0, 0);
     
     updateScoreboard();
 
-    // Fetch data from Google Sheets
     const sheetId = '1JdZDvuKpeUIo_Ut731aDVL4dMhNDQt-YsXplmEfYJXA';
-    const sheetName = `Sayfa${lessonNum}`; // Defaulting to "Sayfa" based on typical Turkish sheet naming, adjust if your tabs are strictly "Lesson1"
+    const sheetName = `Sayfa${lessonNum}`; 
     const queryUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
 
     try {
@@ -163,4 +161,37 @@ function returnToMenu() {
     document.getElementById("landing-page").classList.add("active");
     window.scrollTo(0, 0);
     buildLessonGrid();
+}
+
+// KEYBOARD SHORTCUTS LOGIC
+function setupKeyboardShortcuts() {
+    document.addEventListener("keydown", (event) => {
+        const flashcardPage = document.getElementById("flashcard-page");
+        const unlockBanner = document.getElementById("unlock-banner");
+        
+        // Only allow keyboard controls if the flashcard page is active and the popup banner is hidden
+        if (flashcardPage.classList.contains("active") && unlockBanner.classList.contains("hidden")) {
+            const flashcard = document.getElementById("flashcard");
+            const isFlipped = flashcard.classList.contains("flipped");
+
+            switch(event.key) {
+                case "ArrowUp":
+                    // Up Arrow: Reveal
+                    if (!isFlipped) flipCard();
+                    break;
+                case "ArrowDown":
+                    // Down Arrow: Hide (Handle)
+                    if (isFlipped) resetCardUI();
+                    break;
+                case "ArrowLeft":
+                    // Left Arrow: Wrong (only works if card is already flipped)
+                    if (isFlipped) markAnswer(false);
+                    break;
+                case "ArrowRight":
+                    // Right Arrow: Correct (only works if card is already flipped)
+                    if (isFlipped) markAnswer(true);
+                    break;
+            }
+        }
+    });
 }
