@@ -27,7 +27,11 @@
     <div id="flashcard-page" class="screen">
         <header class="top-bar">
             <button id="btn-back" onclick="returnToMenu()">← Back</button>
-            <div id="scoreboard">Score: <span id="score-count">0</span> / 50</div>
+            <div id="scoreboard">
+                <span id="score-correct">✔ 0</span> | 
+                <span id="score-wrong">✖ 0</span> | 
+                <span id="score-remain">📦 50</span>
+            </div>
         </header>
 
         <div class="card-container" id="flashcard-container" onclick="flipCard()">
@@ -38,7 +42,7 @@
                 </div>
                 <div class="card-face card-back">
                     <p id="turkish-text-back">Turkish Sentence Here</p>
-                    <hr class="divider">
+                    <div class="neon-divider"></div>
                     <p id="english-text">English Sentence Here</p>
                 </div>
             </div>
