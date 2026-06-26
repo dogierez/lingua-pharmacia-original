@@ -123,6 +123,7 @@ function loadCard() {
     resetCardUI();
 }
 
+// === AUTOMATED GRAMMAR PARSER ===
 function applyGrammarRules(text, lessonNum) {
     let txt = text;
     
@@ -188,9 +189,23 @@ function applyGrammarRules(text, lessonNum) {
             txt = txt.replace(/\b(that|if|who|what|where|when|why|how|which|whose|whom)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
             break;
         case 18:
-            // Strictly just participles (verb+ing or verb+ed), filtering out common non-verb overlaps.
-            txt = txt.replace(/\b(?!(everything|nothing|something|anything|morning|evening|bring|sing|ring|spring|king|wing|swing|during)\b)([a-zA-Z]+ing)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
-            txt = txt.replace(/\b(?!(need|bed|red|speed|feed|seed|weed|bleed)\b)([a-zA-Z]+ed)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            // 1. PROTECT CONTINUOUS VERBS: Find am/is/are/was/were (with optional adverbs) + verb-ing and wrap in a safe tag.
+            // This prevents "am watching" or "were secretly waiting" from turning red.
+            txt = txt.replace(/\b(am|is|are|was|were|'m|'re|'s|isn't|aren't|wasn't|weren't)\s+(?:[a-zA-Z']+\s+){0,2}([a-zA-Z]+ing)\b(?![^<]*>)/gi, function(match) {
+                return `<span class="safe">${match}</span>`;
+            });
+
+            // 2. HIGHLIGHT PARTICIPLES & V3s: Now color the actual remaining -ing, -ed, and irregular V3s.
+            const exclusions18 = ["everything", "nothing", "something", "anything", "morning", "evening", "bring", "sing", "ring", "spring", "king", "wing", "swing", "during", "need", "bed", "red", "speed", "feed", "seed", "weed", "bleed"];
+            const irregulars = "broken|made|hidden|bought|paid|taught|forgotten|told|stolen|won|lost";
+            
+            txt = txt.replace(new RegExp(`\\b([a-zA-Z]+(?:ing|ed)|${irregulars})\\b(?![^<]*>)`, 'gi'), function(match, p1) {
+                if (exclusions18.includes(p1.toLowerCase())) return match;
+                return `<span class="c-red">${p1}</span>`;
+            });
+
+            // 3. REMOVE PROTECTION: Remove the safe tags so the continuous verbs just display as normal white text.
+            txt = txt.replace(/<span class="safe">(.*?)<\/span>/gi, '$1');
             break;
         case 19:
             txt = txt.replace(/\b((?:am|is|are|was|were|be|been|isn't|aren't|wasn't|weren't|won't\s+be|will\s+be)\s+allowed\s+to)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
