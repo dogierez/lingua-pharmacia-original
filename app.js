@@ -123,7 +123,7 @@ function loadCard() {
     resetCardUI();
 }
 
-// === AUTOMATED GRAMMAR PARSER ===
+// === BULLETPROOF GRAMMAR PARSER ===
 function applyGrammarRules(text, lessonNum) {
     let txt = text;
     
@@ -189,23 +189,31 @@ function applyGrammarRules(text, lessonNum) {
             txt = txt.replace(/\b(that|if|who|what|where|when|why|how|which|whose|whom)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
             break;
         case 18:
-            // 1. PROTECT CONTINUOUS VERBS: Find am/is/are/was/were (with optional adverbs) + verb-ing and wrap in a safe tag.
-            // This prevents "am watching" or "were secretly waiting" from turning red.
-            txt = txt.replace(/\b(am|is|are|was|were|'m|'re|'s|isn't|aren't|wasn't|weren't)\s+(?:[a-zA-Z']+\s+){0,2}([a-zA-Z]+ing)\b(?![^<]*>)/gi, function(match) {
-                return `<span class="safe">${match}</span>`;
-            });
-
-            // 2. HIGHLIGHT PARTICIPLES & V3s: Now color the actual remaining -ing, -ed, and irregular V3s.
-            const exclusions18 = ["everything", "nothing", "something", "anything", "morning", "evening", "bring", "sing", "ring", "spring", "king", "wing", "swing", "during", "need", "bed", "red", "speed", "feed", "seed", "weed", "bleed"];
-            const irregulars = "broken|made|hidden|bought|paid|taught|forgotten|told|stolen|won|lost";
+            // HARDCODED EXACT MAPPINGS FOR LESSON 18. NO GUESSING. 
+            // These explicitly match your 50 sentences and ONLY highlight the true participle.
+            const lesson18Phrases = [
+                "pulled car", "breaking the", "sleeping woman", "wearing hat", 
+                "doing his", "working in bank", "winning in tournament", "operating doctor", 
+                "barbequed fish", "raising the prices", "entering the house", "making discount", 
+                "going to Canada", "winning the", "crashed car", "raising prices", 
+                "repaired computer", "burned in the", "made in the", "hidden in the", 
+                "developing company", "loved manager", "checked in service", "bought TV", 
+                "knocking the", "loving their", "getting under", "losing his", 
+                "going to work", "including weed", "working at university", "going off", 
+                "playing in this", "working workers", "Rescued people", "paid sums", 
+                "researched subject", "working in hard", "Reached record", "escaping from", 
+                "taught subject", "forgotten celebrities", "putting sugar", "living in forest", 
+                "passing at red", "winning prize", "told subject", "broken computer", "broken chair"
+            ];
             
-            txt = txt.replace(new RegExp(`\\b([a-zA-Z]+(?:ing|ed)|${irregulars})\\b(?![^<]*>)`, 'gi'), function(match, p1) {
-                if (exclusions18.includes(p1.toLowerCase())) return match;
-                return `<span class="c-red">${p1}</span>`;
+            lesson18Phrases.forEach(phrase => {
+                const words = phrase.split(' ');
+                const firstWord = words[0];
+                const restOfPhrase = words.slice(1).join(' ');
+                // Matches the exact phrase, replaces only the first word with red span
+                const phraseRegex = new RegExp(`\\b(${firstWord})\\b( ${restOfPhrase})`, "gi");
+                txt = txt.replace(phraseRegex, '<span class="c-red">$1</span>$2');
             });
-
-            // 3. REMOVE PROTECTION: Remove the safe tags so the continuous verbs just display as normal white text.
-            txt = txt.replace(/<span class="safe">(.*?)<\/span>/gi, '$1');
             break;
         case 19:
             txt = txt.replace(/\b((?:am|is|are|was|were|be|been|isn't|aren't|wasn't|weren't|won't\s+be|will\s+be)\s+allowed\s+to)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
