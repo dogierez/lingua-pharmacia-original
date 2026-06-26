@@ -250,3 +250,4 @@ header {
 .c-purple { color: #B026FF; text-shadow: 0 0 5px rgba(176, 38, 255, 0.5); }
 .c-blue { color: #00E5FF; text-shadow: 0 0 5px rgba(0, 229, 255, 0.5); }
 .c-orange { color: #FF9800; text-shadow: 0 0 5px rgba(255, 152, 0, 0.5); }
+.c-red-underline { text-decoration: underline; text-decoration-color: #FF073A; text-decoration-thickness: 3px; text-underline-offset: 6px; }
