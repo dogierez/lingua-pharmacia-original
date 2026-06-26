@@ -13,6 +13,10 @@ body {
     min-height: 100vh;
     overflow-y: auto; 
     overflow-x: hidden;
+    
+    /* MOVED HERE: The engraved background pattern is now outside the cards */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Ctext x='20' y='50' font-size='35' opacity='0.05' style='filter: grayscale(100%25) brightness(200%25);'%3E📚%3C/text%3E%3Ctext x='100' y='120' font-size='35' opacity='0.05' style='filter: grayscale(100%25) brightness(200%25);'%3E🎓%3C/text%3E%3Ctext x='30' y='140' font-size='35' opacity='0.05' style='filter: grayscale(100%25) brightness(200%25);'%3E💡%3C/text%3E%3Ctext x='110' y='50' font-size='35' opacity='0.05' style='filter: grayscale(100%25) brightness(200%25);'%3E✏️%3C/text%3E%3C/svg%3E");
+    background-repeat: repeat;
 }
 
 .screen {
@@ -116,12 +120,12 @@ header {
 }
 
 #score-correct {
-    color: #39FF14; /* Neon Green */
+    color: #39FF14; 
     text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
 }
 
 #score-wrong {
-    color: #FF073A; /* Neon Red */
+    color: #FF073A; 
     text-shadow: 0 0 5px rgba(255, 7, 58, 0.5);
 }
 
@@ -161,12 +165,9 @@ header {
     width: 100%;
     height: 100%;
     backface-visibility: hidden;
+    /* Clean, solid dark background so text is readable */
     background-color: #1e1e1e;
     border-radius: 16px;
-    
-    /* ENGRAVED EDUCATIONAL BACKGROUND PATTERN */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Ctext x='20' y='50' font-size='35' opacity='0.05' style='filter: grayscale(100%25) brightness(200%25);'%3E📚%3C/text%3E%3Ctext x='100' y='120' font-size='35' opacity='0.05' style='filter: grayscale(100%25) brightness(200%25);'%3E🎓%3C/text%3E%3Ctext x='30' y='140' font-size='35' opacity='0.05' style='filter: grayscale(100%25) brightness(200%25);'%3E💡%3C/text%3E%3Ctext x='110' y='50' font-size='35' opacity='0.05' style='filter: grayscale(100%25) brightness(200%25);'%3E✏️%3C/text%3E%3C/svg%3E");
-    background-repeat: repeat;
     
     /* NEON BLUE OUTLINE & GLOW */
     border: 3px solid #00E5FF;
@@ -183,7 +184,7 @@ header {
     transform: rotateX(180deg);
 }
 
-/* Swapped Colors: Turkish is Yellow, English is White */
+/* Colors: Turkish is Yellow, English is White */
 #turkish-text, #turkish-text-back {
     font-size: 36px;
     font-weight: bold;
@@ -198,7 +199,7 @@ header {
     line-height: 1.3;
 }
 
-/* Grammar target highlight class (for future use) */
+/* Grammar target highlight class */
 .grammar-highlight {
     color: #FF073A; /* Neon Red */
     text-shadow: 0 0 8px rgba(255, 7, 58, 0.6);
