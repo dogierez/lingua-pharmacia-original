@@ -86,7 +86,7 @@ async function startLesson(lessonNum) {
             english: row.c[1] ? row.c[1].v : ""
         })).filter(card => card.turkish !== "");
 
-        shuffleDeck(currentDeck); // Randomizes the 50 cards automatically
+        shuffleDeck(currentDeck); 
 
     } catch (error) {
         console.error("Error fetching sheet", error);
@@ -105,7 +105,7 @@ function loadCard() {
             currentDeck = [...incorrectPile];
             incorrectPile = [];
             currentCardIndex = 0;
-            shuffleDeck(currentDeck); // Reshuffles the wrong pile too!
+            shuffleDeck(currentDeck); 
         } else {
             alert("Deck finished! You have mastered all cards.");
             returnToMenu();
@@ -123,7 +123,6 @@ function loadCard() {
     resetCardUI();
 }
 
-// === AUTOMATED GRAMMAR PARSER (Lessons 1-19) ===
 function applyGrammarRules(text, lessonNum) {
     let txt = text;
     
@@ -166,7 +165,6 @@ function applyGrammarRules(text, lessonNum) {
             txt = txt.replace(/\b(am|is|are|was|were|will\s+be|isn't|wasn't|weren't|aren't|'m|'re|'s)\b(?![^<]*>)/gi, '<span class="c-blue">$&</span>');
             break;
         case 11:
-            // Past continuous/perfect and used to (affirmative & negative)
             txt = txt.replace(/\b(wasn't|weren't|was|were|hadn't|had|used\s+to|didn't\s+use\s+to)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
             break;
         case 12:
@@ -176,15 +174,11 @@ function applyGrammarRules(text, lessonNum) {
             txt = txt.replace(/\b(because|although|when|while|after|before|due\s+to|despite|since|until)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
             break;
         case 14:
-            // "in a ... way"
             txt = txt.replace(/\b(in\s+a)\s+([a-zA-Z]+)\s+(way)\b(?![^<]*>)/gi, '<span class="c-red">$1</span> $2 <span class="c-red">$3</span>');
-            // "by doing" (targeting 'by' and 'ing')
             txt = txt.replace(/\b(by)\s+([a-zA-Z]+)(ing)\b(?![^<]*>)/gi, '<span class="c-red">$1</span> $2<span class="c-red">$3</span>');
             break;
         case 15:
-            // "in order to" + following verb
             txt = txt.replace(/\b(in\s+order\s+to\s+[a-zA-Z]+)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
-            // "so that", "can", "could"
             txt = txt.replace(/\b(so\s+that|can|could)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
             break;
         case 16:
@@ -194,16 +188,12 @@ function applyGrammarRules(text, lessonNum) {
             txt = txt.replace(/\b(that|if|who|what|where|when|why|how|which|whose|whom)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
             break;
         case 18:
-            // Full Adjective Clauses denoted by {brackets} in the Google Sheet 
-            // e.g., {driving a fast car} -> driving (Red), a fast car (White w/ Red Underline)
-            txt = txt.replace(/\{([a-zA-Z]+(?:ing|ed|en))\s+([^}]+)\}/gi, '<span class="c-red">$1</span> <span class="c-red-underline">$2</span>');
-            // Standalone participles in the sentence
-            txt = txt.replace(/\b([a-zA-Z]+(?:ing|ed))\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            // Strictly just participles (verb+ing or verb+ed), filtering out common non-verb overlaps.
+            txt = txt.replace(/\b(?!(everything|nothing|something|anything|morning|evening|bring|sing|ring|spring|king|wing|swing|during)\b)([a-zA-Z]+ing)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            txt = txt.replace(/\b(?!(need|bed|red|speed|feed|seed|weed|bleed)\b)([a-zA-Z]+ed)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
             break;
         case 19:
-            // "be allowed to" forms
             txt = txt.replace(/\b((?:am|is|are|was|were|be|been|isn't|aren't|wasn't|weren't|won't\s+be|will\s+be)\s+allowed\s+to)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
-            // Present perfect continuous (have/has/had been + ing)
             txt = txt.replace(/\b(have\s+been|has\s+been|had\s+been|haven't\s+been|hasn't\s+been|hadn't\s+been)\s+([a-zA-Z]+)(ing)\b(?![^<]*>)/gi, '<span class="c-red">$1</span> $2<span class="c-red">$3</span>');
             break;
     }
