@@ -7,12 +7,10 @@ let currentDeck = [];
 let incorrectPile = [];
 let currentCardIndex = 0;
 
-// Scoreboard Trackers
 let correctCount = 0;
 let totalMistakes = 0;
 let unlockTriggered = false;
 
-// Admin Override Variables
 let logoTaps = 0;
 let lastTapTime = 0;
 let isAdminMode = false;
@@ -85,7 +83,7 @@ async function startLesson(lessonNum) {
         console.error("Error fetching sheet", error);
         currentDeck = Array.from({length: 50}, (_, i) => ({
             turkish: `Örnek Cümle ${i + 1}`,
-            english: `Example <span style="color: #4caf50;">${i + 1}</span>`
+            english: `Example Sentence`
         }));
     }
 
@@ -108,9 +106,63 @@ function loadCard() {
     const card = currentDeck[currentCardIndex];
     document.getElementById("turkish-text").innerText = card.turkish;
     document.getElementById("turkish-text-back").innerText = card.turkish;
-    document.getElementById("english-text").innerHTML = card.english; 
+    
+    // Process the plain English text through the grammar highlighter!
+    const formattedEnglish = applyGrammarRules(card.english, currentLesson);
+    document.getElementById("english-text").innerHTML = formattedEnglish; 
 
     resetCardUI();
+}
+
+// === AUTOMATED GRAMMAR PARSER ===
+function applyGrammarRules(text, lessonNum) {
+    let txt = text;
+    // Note: (?![^<]*>) ensures we don't accidentally replace a word that is already inside an HTML tag.
+    
+    switch(lessonNum) {
+        case 1:
+            txt = txt.replace(/\b(didn't|don't|did|will|won't)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            // Past simple 'ed'. Excluding common words that end in ed but aren't verbs.
+            txt = txt.replace(/\b(?!(need|bed|red|speed|feed|seed|weed|bleed)\b)([A-Za-z]+ed)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            break;
+        case 2:
+            txt = txt.replace(/\b(who|what|where|when|why|how|which|whose|whom)\b(?![^<]*>)/gi, '<span class="c-purple">$&</span>');
+            txt = txt.replace(/\b(did|do|will)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            break;
+        case 3:
+            // "will be", "is", "was", etc and "there"
+            txt = txt.replace(/\b(will\s+be)\b(?![^<]*>)/gi, '<span class="c-blue">$&</span>');
+            txt = txt.replace(/\b(there|is|are|was|were)\b(?![^<]*>)/gi, '<span class="c-blue">$&</span>');
+            txt = txt.replace(/\b(didn't\s+have|will\s+have|have|has|had)\b(?![^<]*>)/gi, '<span class="c-orange">$&</span>');
+            break;
+        case 4:
+            txt = txt.replace(/\b(everybody|everyone|everything|nobody|no\s*one|nothing|somebody|someone|something|anybody|anyone|anything)\b(?![^<]*>)/gi, '<span class="c-orange">$&</span>');
+            break;
+        case 5:
+            txt = txt.replace(/\b(can|can't|cannot|could|couldn't|will\s+be\s+able\s+to|won't\s+be\s+able\s+to|am\s+able\s+to|is\s+able\s+to|are\s+able\s+to|was\s+able\s+to|were\s+able\s+to)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            break;
+        case 6:
+            txt = txt.replace(/\b(have\s+to|has\s+to|had\s+to|will\s+have\s+to|don't\s+have\s+to|doesn't\s+have\s+to|didn't\s+have\s+to)\b(?![^<]*>)/gi, '<span class="c-red-alt">$&</span>');
+            txt = txt.replace(/\b(didn't|don't|doesn't|won't|will|do|does)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            break;
+        case 7:
+            txt = txt.replace(/\b(and|but|so|or|otherwise|then)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            break;
+        case 8:
+            txt = txt.replace(/\b(shouldn't\s+have|should\s+have|shouldn't|should|have)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            txt = txt.replace(/\b(?!(need|bed|red|speed|feed|seed|weed|bleed)\b)([A-Za-z]+ed)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            break;
+        case 9:
+            txt = txt.replace(/\b(in|on|at)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            break;
+        case 10:
+            // 1. Target Present Continuous (e.g., 'are wearing')
+            txt = txt.replace(/\b(am|is|are|was|were|'m|'re|'s|aren't|isn't|wasn't|weren't)\s+([A-Za-z]+)(ing)\b(?![^<]*>)/gi, '<span class="c-red">$1</span> $2<span class="c-red">$3</span>');
+            // 2. Target remaining standalone Be verbs for State/Comparative sentences
+            txt = txt.replace(/\b(am|is|are|was|were|will\s+be|isn't|wasn't|weren't|aren't|'m|'re|'s)\b(?![^<]*>)/gi, '<span class="c-blue">$&</span>');
+            break;
+    }
+    return txt;
 }
 
 function flipCard() {
@@ -145,7 +197,6 @@ function markAnswer(isCorrect) {
 }
 
 function updateScoreboard() {
-    // Correct total, mistakes total, and remaining out of the 50 deck
     document.getElementById("score-correct").innerText = "✔ " + correctCount;
     document.getElementById("score-wrong").innerText = "✖ " + totalMistakes;
     document.getElementById("score-remain").innerText = "📦 " + (50 - correctCount);
@@ -177,7 +228,6 @@ function returnToMenu() {
     buildLessonGrid();
 }
 
-// --- ADMIN TOGGLE LOGIC ---
 function toggleAdminMode() {
     if (isAdminMode) {
         isAdminMode = false;
