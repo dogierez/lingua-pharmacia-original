@@ -1,5 +1,5 @@
-// CACHE BUSTED TO v6
-const CACHE_NAME = 'flashcard-app-v6'; 
+// CACHE BUSTED TO v7
+const CACHE_NAME = 'flashcard-app-v7'; 
 
 const ASSETS_TO_CACHE = [
     './',
