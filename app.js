@@ -50,6 +50,13 @@ function buildLessonGrid() {
     }
 }
 
+function shuffleDeck(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
 async function startLesson(lessonNum) {
     currentLesson = lessonNum;
     correctCount = 0;
@@ -79,6 +86,8 @@ async function startLesson(lessonNum) {
             english: row.c[1] ? row.c[1].v : ""
         })).filter(card => card.turkish !== "");
 
+        shuffleDeck(currentDeck); // Randomizes the 50 cards automatically
+
     } catch (error) {
         console.error("Error fetching sheet", error);
         currentDeck = Array.from({length: 50}, (_, i) => ({
@@ -96,6 +105,7 @@ function loadCard() {
             currentDeck = [...incorrectPile];
             incorrectPile = [];
             currentCardIndex = 0;
+            shuffleDeck(currentDeck); // Reshuffles the wrong pile too!
         } else {
             alert("Deck finished! You have mastered all cards.");
             returnToMenu();
@@ -107,22 +117,19 @@ function loadCard() {
     document.getElementById("turkish-text").innerText = card.turkish;
     document.getElementById("turkish-text-back").innerText = card.turkish;
     
-    // Process the plain English text through the grammar highlighter!
     const formattedEnglish = applyGrammarRules(card.english, currentLesson);
     document.getElementById("english-text").innerHTML = formattedEnglish; 
 
     resetCardUI();
 }
 
-// === AUTOMATED GRAMMAR PARSER ===
+// === AUTOMATED GRAMMAR PARSER (Lessons 1-19) ===
 function applyGrammarRules(text, lessonNum) {
     let txt = text;
-    // Note: (?![^<]*>) ensures we don't accidentally replace a word that is already inside an HTML tag.
     
     switch(lessonNum) {
         case 1:
             txt = txt.replace(/\b(didn't|don't|did|will|won't)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
-            // Past simple 'ed'. Excluding common words that end in ed but aren't verbs.
             txt = txt.replace(/\b(?!(need|bed|red|speed|feed|seed|weed|bleed)\b)([A-Za-z]+ed)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
             break;
         case 2:
@@ -130,7 +137,6 @@ function applyGrammarRules(text, lessonNum) {
             txt = txt.replace(/\b(did|do|will)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
             break;
         case 3:
-            // "will be", "is", "was", etc and "there"
             txt = txt.replace(/\b(will\s+be)\b(?![^<]*>)/gi, '<span class="c-blue">$&</span>');
             txt = txt.replace(/\b(there|is|are|was|were)\b(?![^<]*>)/gi, '<span class="c-blue">$&</span>');
             txt = txt.replace(/\b(didn't\s+have|will\s+have|have|has|had)\b(?![^<]*>)/gi, '<span class="c-orange">$&</span>');
@@ -156,10 +162,49 @@ function applyGrammarRules(text, lessonNum) {
             txt = txt.replace(/\b(in|on|at)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
             break;
         case 10:
-            // 1. Target Present Continuous (e.g., 'are wearing')
             txt = txt.replace(/\b(am|is|are|was|were|'m|'re|'s|aren't|isn't|wasn't|weren't)\s+([A-Za-z]+)(ing)\b(?![^<]*>)/gi, '<span class="c-red">$1</span> $2<span class="c-red">$3</span>');
-            // 2. Target remaining standalone Be verbs for State/Comparative sentences
             txt = txt.replace(/\b(am|is|are|was|were|will\s+be|isn't|wasn't|weren't|aren't|'m|'re|'s)\b(?![^<]*>)/gi, '<span class="c-blue">$&</span>');
+            break;
+        case 11:
+            // Past continuous/perfect and used to (affirmative & negative)
+            txt = txt.replace(/\b(wasn't|weren't|was|were|hadn't|had|used\s+to|didn't\s+use\s+to)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            break;
+        case 12:
+            txt = txt.replace(/\b(because|although|when|while|after|before)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            break;
+        case 13:
+            txt = txt.replace(/\b(because|although|when|while|after|before|due\s+to|despite|since|until)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            break;
+        case 14:
+            // "in a ... way"
+            txt = txt.replace(/\b(in\s+a)\s+([a-zA-Z]+)\s+(way)\b(?![^<]*>)/gi, '<span class="c-red">$1</span> $2 <span class="c-red">$3</span>');
+            // "by doing" (targeting 'by' and 'ing')
+            txt = txt.replace(/\b(by)\s+([a-zA-Z]+)(ing)\b(?![^<]*>)/gi, '<span class="c-red">$1</span> $2<span class="c-red">$3</span>');
+            break;
+        case 15:
+            // "in order to" + following verb
+            txt = txt.replace(/\b(in\s+order\s+to\s+[a-zA-Z]+)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            // "so that", "can", "could"
+            txt = txt.replace(/\b(so\s+that|can|could)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            break;
+        case 16:
+            txt = txt.replace(/\b(get|gets|got|getting|will\s+get)\s+([a-zA-Z]+)\b(?![^<]*>)/gi, '<span class="c-red">$1</span> <span class="c-orange">$2</span>');
+            break;
+        case 17:
+            txt = txt.replace(/\b(that|if|who|what|where|when|why|how|which|whose|whom)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            break;
+        case 18:
+            // Full Adjective Clauses denoted by {brackets} in the Google Sheet 
+            // e.g., {driving a fast car} -> driving (Red), a fast car (White w/ Red Underline)
+            txt = txt.replace(/\{([a-zA-Z]+(?:ing|ed|en))\s+([^}]+)\}/gi, '<span class="c-red">$1</span> <span class="c-red-underline">$2</span>');
+            // Standalone participles in the sentence
+            txt = txt.replace(/\b([a-zA-Z]+(?:ing|ed))\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            break;
+        case 19:
+            // "be allowed to" forms
+            txt = txt.replace(/\b((?:am|is|are|was|were|be|been|isn't|aren't|wasn't|weren't|won't\s+be|will\s+be)\s+allowed\s+to)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
+            // Present perfect continuous (have/has/had been + ing)
+            txt = txt.replace(/\b(have\s+been|has\s+been|had\s+been|haven't\s+been|hasn't\s+been|hadn't\s+been)\s+([a-zA-Z]+)(ing)\b(?![^<]*>)/gi, '<span class="c-red">$1</span> $2<span class="c-red">$3</span>');
             break;
     }
     return txt;
