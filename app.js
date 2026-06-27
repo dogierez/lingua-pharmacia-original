@@ -102,13 +102,13 @@ async function startLesson(lessonNum) {
 function loadCard() {
     if (currentCardIndex >= currentDeck.length) {
         if (incorrectPile.length > 0) {
-            currentDeck = [...incorrectPile];
-            incorrectPile = [];
-            currentCardIndex = 0;
-            shuffleDeck(currentDeck); 
+            // Replaced alert with custom Review Banner
+            document.getElementById("review-count").innerText = incorrectPile.length;
+            document.getElementById("review-banner").classList.remove("hidden");
+            return;
         } else {
-            alert("Deck finished! You have mastered all cards.");
-            returnToMenu();
+            // Replaced alert with custom Finished Banner
+            document.getElementById("finished-banner").classList.remove("hidden");
             return;
         }
     }
@@ -123,7 +123,27 @@ function loadCard() {
     resetCardUI();
 }
 
-// === BULLETPROOF GRAMMAR PARSER ===
+// NEW BANNER BUTTON FUNCTIONS
+function startReview() {
+    document.getElementById("review-banner").classList.add("hidden");
+    currentDeck = [...incorrectPile];
+    incorrectPile = [];
+    currentCardIndex = 0;
+    shuffleDeck(currentDeck); 
+    loadCard();
+}
+
+function cancelReview() {
+    document.getElementById("review-banner").classList.add("hidden");
+    returnToMenu();
+}
+
+function closeFinishedBanner() {
+    document.getElementById("finished-banner").classList.add("hidden");
+    returnToMenu();
+}
+
+
 function applyGrammarRules(text, lessonNum) {
     let txt = text;
     
@@ -189,8 +209,6 @@ function applyGrammarRules(text, lessonNum) {
             txt = txt.replace(/\b(that|if|who|what|where|when|why|how|which|whose|whom)\b(?![^<]*>)/gi, '<span class="c-red">$&</span>');
             break;
         case 18:
-            // HARDCODED EXACT MAPPINGS FOR LESSON 18. NO GUESSING. 
-            // These explicitly match your 50 sentences and ONLY highlight the true participle.
             const lesson18Phrases = [
                 "pulled car", "breaking the", "sleeping woman", "wearing hat", 
                 "doing his", "working in bank", "winning in tournament", "operating doctor", 
@@ -210,7 +228,6 @@ function applyGrammarRules(text, lessonNum) {
                 const words = phrase.split(' ');
                 const firstWord = words[0];
                 const restOfPhrase = words.slice(1).join(' ');
-                // Matches the exact phrase, replaces only the first word with red span
                 const phraseRegex = new RegExp(`\\b(${firstWord})\\b( ${restOfPhrase})`, "gi");
                 txt = txt.replace(phraseRegex, '<span class="c-red">$1</span>$2');
             });
@@ -290,12 +307,12 @@ function toggleAdminMode() {
     if (isAdminMode) {
         isAdminMode = false;
         unlockedLevel = realSavedLevel; 
-        alert("Admin Mode: OFF. Returning to normal progression.");
+        alert("Admin Mode: OFF. Returning to normal progression."); // Kept this one alert just for you as an admin confirmation
     } else {
         isAdminMode = true;
         realSavedLevel = unlockedLevel; 
         unlockedLevel = totalLessons; 
-        alert("Admin Mode: ON. All lessons temporarily unlocked.");
+        alert("Admin Mode: ON. All lessons temporarily unlocked."); // Kept this one alert just for you
     }
     buildLessonGrid();
 }
@@ -330,8 +347,15 @@ function setupKeyboardShortcuts() {
 
         const flashcardPage = document.getElementById("flashcard-page");
         const unlockBanner = document.getElementById("unlock-banner");
+        const reviewBanner = document.getElementById("review-banner");
+        const finishedBanner = document.getElementById("finished-banner");
         
-        if (flashcardPage.classList.contains("active") && unlockBanner.classList.contains("hidden")) {
+        // Prevent keyboard shortcuts if any pop-up banner is active
+        if (flashcardPage.classList.contains("active") && 
+            unlockBanner.classList.contains("hidden") &&
+            reviewBanner.classList.contains("hidden") &&
+            finishedBanner.classList.contains("hidden")) {
+            
             const flashcard = document.getElementById("flashcard");
             const isFlipped = flashcard.classList.contains("flipped");
 
