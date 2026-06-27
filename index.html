@@ -65,6 +65,27 @@
         </div>
     </div>
 
+    <div id="review-banner" class="overlay hidden">
+        <div class="banner-content">
+            <h2>Keep Going?</h2>
+            <p>You have <strong id="review-count" style="color: #FF073A;">0</strong> incorrect cards. Would you like to go over the wrong ones?</p>
+            <div class="banner-buttons">
+                <button class="btn-primary" onclick="startReview()">Review Mistakes</button>
+                <button class="btn-secondary" onclick="cancelReview()">Return to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="finished-banner" class="overlay hidden">
+        <div class="banner-content">
+            <h2>🏆 Mastered! 🏆</h2>
+            <p>Deck finished! You have mastered all the cards in this lesson.</p>
+            <div class="banner-buttons">
+                <button class="btn-primary" onclick="closeFinishedBanner()">Return to Menu</button>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
     
     <script>
